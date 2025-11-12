@@ -1,0 +1,85 @@
+import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+const api = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Interceptor para adicionar token em todas as requisições
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Interceptor para tratar erros de autenticação
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Autenticação
+export const authService = {
+  register: (data) => api.post('/auth/register', data),
+  login: (data) => api.post('/auth/login', data),
+  getMe: () => api.get('/auth/me'),
+};
+
+// Sabores
+export const saboresService = {
+  getAll: (apenasAtivos = true) => api.get(`/sabores/?apenas_ativos=${apenasAtivos}`),
+  getById: (id) => api.get(`/sabores/${id}`),
+  create: (data) => api.post('/sabores/', data),
+  update: (id, data) => api.put(`/sabores/${id}`, data),
+  delete: (id) => api.delete(`/sabores/${id}`),
+};
+
+// Eventos
+export const eventosService = {
+  getAll: () => api.get('/eventos/'),
+  getAtivo: () => api.get('/eventos/ativo'),
+  getById: (id) => api.get(`/eventos/${id}`),
+  create: (data) => api.post('/eventos/', data),
+  update: (id, data) => api.put(`/eventos/${id}`, data),
+  delete: (id) => api.delete(`/eventos/${id}`),  // NOVO!
+  getResumo: (id) => api.get(`/eventos/${id}/resumo`),
+};
+
+// Pedidos
+export const pedidosService = {
+  create: (data) => api.post('/pedidos/', data),
+  getMeusPedidos: () => api.get('/pedidos/meus-pedidos'),
+  getById: (id) => api.get(`/pedidos/${id}`),
+  getPorEvento: (eventoId) => api.get(`/pedidos/evento/${eventoId}/todos`),
+  update: (id, data) => api.put(`/pedidos/${id}`, data),
+  editar: (id, data) => api.put(`/pedidos/${id}/editar`, data),  // NOVO!
+  cancel: (id) => api.delete(`/pedidos/${id}`),
+};
+
+// Dashboard
+export const dashboardService = {
+  getEvento: (eventoId) => api.get(`/dashboard/evento/${eventoId}`),
+  getOportunidades: (eventoId) => api.get(`/dashboard/evento/${eventoId}/oportunidades`),
+  getSugestoes: (eventoId) => api.get(`/dashboard/evento/${eventoId}/sugestao-combinacao`),
+  getAgrupamentoInteligente: (eventoId) => api.get(`/dashboard/evento/${eventoId}/agrupamento-inteligente`),  // NOVO!
+};
+
+export default api;
