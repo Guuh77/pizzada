@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Pizza, User, Lock, AlertCircle } from 'lucide-react';
+import { Mail, Lock, AlertCircle } from 'lucide-react';
 
 const Login = () => {
-  const [nomeCompleto, setNomeCompleto] = useState('');
+  const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,7 +17,7 @@ const Login = () => {
     setError('');
     setLoading(true);
 
-    const result = await login(nomeCompleto, senha);
+    const result = await login(email, senha);
     
     if (result.success) {
       navigate('/dashboard');
@@ -29,18 +29,19 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-secondary to-accent p-4">
-      <div className="w-full max-w-md">
-        <div className="card text-center mb-8">
-          {/* Logo/Avatar do Roger */}
-          <div className="flex justify-center mb-4">
-            <div className="w-32 h-32 bg-dark rounded-full flex items-center justify-center shadow-xl">
-              <Pizza size={64} className="text-primary" />
-            </div>
-          </div>
-          
-          <h1 className="text-3xl font-bold text-dark mb-2">Pizzada do Roger</h1>
-          <p className="text-gray-600">Entre para fazer seu pedido! 🍕</p>
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="w-full max-w-md animate-fadeIn">
+        <div className="flex justify-center mb-6">
+          <img 
+            src="/roger-avatar.jpg" 
+            alt="PIZZADA DO LELO"
+            className="w-32 h-32 rounded-full shadow-xl border-4 border-white"
+          />
+        </div>
+
+        <div className="card text-center mb-6">
+          <h1 className="text-3xl font-bold text-text-primary mb-2">PIZZADA DO LELO</h1>
+          <p className="text-text-secondary">Entre para fazer seu pedido! 🍕</p>
         </div>
 
         <div className="card">
@@ -53,15 +54,15 @@ const Login = () => {
             )}
 
             <div>
-              <label className="label">Nome Completo</label>
+              <label className="label">Email</label>
               <div className="relative">
-                <User className="absolute left-3 top-3 text-gray-400" size={20} />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                 <input
-                  type="text"
+                  type="email"
                   className="input pl-10"
-                  placeholder="Digite seu nome completo"
-                  value={nomeCompleto}
-                  onChange={(e) => setNomeCompleto(e.target.value)}
+                  placeholder="Digite seu e-mail"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
@@ -70,7 +71,7 @@ const Login = () => {
             <div>
               <label className="label">Senha</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 text-gray-400" size={20} />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                 <input
                   type="password"
                   className="input pl-10"
@@ -80,6 +81,12 @@ const Login = () => {
                   required
                 />
               </div>
+            </div>
+
+            <div className="text-right text-sm">
+              <Link to="/forgot-password" className="text-primary font-semibold hover:underline">
+                Esqueceu a senha?
+              </Link>
             </div>
 
             <button
@@ -92,20 +99,13 @@ const Login = () => {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-gray-600">
+            <p className="text-text-secondary">
               Não tem uma conta?{' '}
               <Link to="/register" className="text-primary font-semibold hover:underline">
                 Cadastre-se aqui
               </Link>
             </p>
           </div>
-        </div>
-
-        <div className="mt-6 text-center text-white text-sm">
-          <p>🍕 Sistema de Pedidos da Pizzada</p>
-          <p className="mt-1 text-xs opacity-75">
-            Eventos nos dias especiais: 08/08, 09/09, 10/10, 11/11, 12/12
-          </p>
         </div>
       </div>
     </div>

@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
       if (token && savedUser) {
         setUser(JSON.parse(savedUser));
         
-        // Validar token
+        // Validar token e buscar dados atualizados (incluindo e-mail)
         try {
           const response = await authService.getMe();
           setUser(response.data);
@@ -32,10 +32,11 @@ export const AuthProvider = ({ children }) => {
     loadUser();
   }, []);
 
-  const login = async (nomeCompleto, senha) => {
+  const login = async (email, senha) => {
     try {
+      // Atualizado para usar 'email'
       const response = await authService.login({
-        nome_completo: nomeCompleto,
+        email: email,
         senha: senha,
       });
       
@@ -54,17 +55,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (nomeCompleto, senha, setor, isAdmin = false) => {
+  const register = async (nomeCompleto, email, senha, setor, isAdmin = false) => {
     try {
+      // Atualizado para incluir 'email'
       await authService.register({
         nome_completo: nomeCompleto,
+        email: email,
         senha: senha,
         setor: setor,
         is_admin: isAdmin,
       });
       
-      // Após registrar, fazer login automaticamente
-      return await login(nomeCompleto, senha);
+      // Após registrar, fazer login automaticamente com email e senha
+      return await login(email, senha);
     } catch (error) {
       return {
         success: false,

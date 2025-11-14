@@ -27,7 +27,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Não redirecionar em rotas de redefinição de senha
+    if (
+      error.response?.status === 401 &&
+      !window.location.pathname.includes('/reset-password')
+    ) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
@@ -41,6 +45,8 @@ export const authService = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
   getMe: () => api.get('/auth/me'),
+  forgotPassword: (data) => api.post('/auth/forgot-password', data), // (data agora é { email: "..." })
+  resetPassword: (data) => api.post('/auth/reset-password', data),   // (data agora é { email, codigo, nova_senha })
 };
 
 // Sabores
@@ -59,7 +65,7 @@ export const eventosService = {
   getById: (id) => api.get(`/eventos/${id}`),
   create: (data) => api.post('/eventos/', data),
   update: (id, data) => api.put(`/eventos/${id}`, data),
-  delete: (id) => api.delete(`/eventos/${id}`),  // NOVO!
+  delete: (id) => api.delete(`/eventos/${id}`),
   getResumo: (id) => api.get(`/eventos/${id}/resumo`),
 };
 
@@ -70,7 +76,7 @@ export const pedidosService = {
   getById: (id) => api.get(`/pedidos/${id}`),
   getPorEvento: (eventoId) => api.get(`/pedidos/evento/${eventoId}/todos`),
   update: (id, data) => api.put(`/pedidos/${id}`, data),
-  editar: (id, data) => api.put(`/pedidos/${id}/editar`, data),  // NOVO!
+  editar: (id, data) => api.put(`/pedidos/${id}/editar`, data),
   cancel: (id) => api.delete(`/pedidos/${id}`),
 };
 
@@ -79,7 +85,7 @@ export const dashboardService = {
   getEvento: (eventoId) => api.get(`/dashboard/evento/${eventoId}`),
   getOportunidades: (eventoId) => api.get(`/dashboard/evento/${eventoId}/oportunidades`),
   getSugestoes: (eventoId) => api.get(`/dashboard/evento/${eventoId}/sugestao-combinacao`),
-  getAgrupamentoInteligente: (eventoId) => api.get(`/dashboard/evento/${eventoId}/agrupamento-inteligente`),  // NOVO!
+  getAgrupamentoInteligente: (eventoId) => api.get(`/dashboard/evento/${eventoId}/agrupamento-inteligente`),
 };
 
 export default api;

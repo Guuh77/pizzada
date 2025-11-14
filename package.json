@@ -1,7 +1,7 @@
 {
-  "name": "pizzada-do-roger-frontend",
+  "name": "pizzada-do-lelo-frontend",
   "version": "1.0.0",
-  "description": "Frontend da Pizzada do Roger",
+  "description": "Frontend da PIZZADA DO LELO",
   "private": true,
   "scripts": {
     "dev": "vite",

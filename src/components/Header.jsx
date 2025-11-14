@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Pizza, LogOut, User, LayoutDashboard, Settings } from 'lucide-react';
+import { Pizza, LogOut, LayoutDashboard, Settings } from 'lucide-react';
 
 const Header = () => {
   const { user, logout, isAdmin } = useAuth();
@@ -13,48 +13,45 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-dark text-white shadow-lg">
+    <header className="bg-card text-text-primary shadow-lg sticky top-0 z-50 border-b border-border-color">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          {/* Logo e Nome */}
           <Link to="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
               <Pizza size={28} className="text-white" />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold">Pizzada do Roger</h1>
-              <p className="text-xs text-gray-300">Sistema de Pedidos</p>
+            <div className="hidden sm:block">
+              <h1 className="text-2xl font-bold text-text-primary">PIZZADA DO LELO</h1>
+              <p className="text-xs text-text-secondary">Sistema de Pedidos</p>
             </div>
           </Link>
 
-          {/* Navegação */}
           {user && (
-            <nav className="flex items-center space-x-6">
+            <nav className="flex items-center space-x-2 sm:space-x-6">
               <Link
                 to="/dashboard"
-                className="flex items-center space-x-2 hover:text-secondary transition-colors"
+                className="flex items-center space-x-2 hover:text-primary transition-colors p-2 rounded-lg"
               >
                 <LayoutDashboard size={20} />
-                <span>Dashboard</span>
+                <span className="hidden md:inline">Dashboard</span>
               </Link>
 
               {isAdmin() && (
                 <Link
                   to="/admin"
-                  className="flex items-center space-x-2 hover:text-secondary transition-colors"
+                  className="flex items-center space-x-2 hover:text-primary transition-colors p-2 rounded-lg"
                 >
                   <Settings size={20} />
-                  <span>Admin</span>
+                  <span className="hidden md:inline">Admin</span>
                 </Link>
               )}
 
-              {/* Informações do usuário */}
-              <div className="flex items-center space-x-4 border-l border-gray-600 pl-6">
-                <div className="text-right">
-                  <p className="text-sm font-semibold">{user.nome_completo}</p>
-                  <p className="text-xs text-gray-400">{user.setor}</p>
+              <div className="flex items-center space-x-2 sm:space-x-4 border-l border-border-color pl-2 sm:pl-6">
+                <div className="text-right hidden sm:block">
+                  <p className="text-sm font-semibold truncate max-w-[150px]">{user.nome_completo}</p>
+                  <p className="text-xs text-text-secondary">{user.setor}</p>
                   {isAdmin() && (
-                    <span className="text-xs bg-secondary text-dark px-2 py-0.5 rounded">
+                    <span className="text-xs bg-secondary text-text-primary px-2 py-0.5 rounded">
                       Admin
                     </span>
                   )}
@@ -62,7 +59,7 @@ const Header = () => {
 
                 <button
                   onClick={handleLogout}
-                  className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                   title="Sair"
                 >
                   <LogOut size={20} />

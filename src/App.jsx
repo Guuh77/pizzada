@@ -9,6 +9,8 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import FazerPedido from './pages/FazerPedido';
 import Admin from './pages/Admin';
+import ForgotPassword from './pages/ForgotPassword'; // Nova Página
+import ResetPassword from './pages/ResetPassword';   // Nova Página
 
 function App() {
   return (
@@ -18,6 +20,8 @@ function App() {
           {/* Rotas Públicas */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           
           {/* Rotas Protegidas */}
           <Route

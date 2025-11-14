@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Pizza, User, Lock, Briefcase, AlertCircle } from 'lucide-react';
+import { User, Mail, Lock, Briefcase, AlertCircle } from 'lucide-react';
 
 const Register = () => {
   const [nomeCompleto, setNomeCompleto] = useState('');
+  const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
   const [setor, setSetor] = useState('');
@@ -18,20 +19,17 @@ const Register = () => {
     e.preventDefault();
     setError('');
 
-    // Validações
     if (senha !== confirmarSenha) {
       setError('As senhas não coincidem');
       return;
     }
-
     if (senha.length < 6) {
       setError('A senha deve ter no mínimo 6 caracteres');
       return;
     }
 
     setLoading(true);
-
-    const result = await register(nomeCompleto, senha, setor);
+    const result = await register(nomeCompleto, email, senha, setor);
     
     if (result.success) {
       navigate('/dashboard');
@@ -43,17 +41,16 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-secondary to-accent p-4">
-      <div className="w-full max-w-md">
-        <div className="card text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="w-32 h-32 bg-dark rounded-full flex items-center justify-center shadow-xl">
-              <Pizza size={64} className="text-primary" />
-            </div>
-          </div>
-          
-          <h1 className="text-3xl font-bold text-dark mb-2">Criar Conta</h1>
-          <p className="text-gray-600">Junte-se à Pizzada do Roger! 🍕</p>
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="w-full max-w-md animate-fadeIn">
+        <div className="card text-center mb-6">
+          <img 
+            src="/roger-avatar.jpg" 
+            alt="PIZZADA DO LELO"
+            className="w-32 h-32 rounded-full shadow-xl border-4 border-white mx-auto mb-4"
+          />
+          <h1 className="text-3xl font-bold text-text-primary mb-2">Criar Conta</h1>
+          <p className="text-text-secondary">Junte-se à PIZZADA DO LELO! 🍕</p>
         </div>
 
         <div className="card">
@@ -68,7 +65,7 @@ const Register = () => {
             <div>
               <label className="label">Nome Completo</label>
               <div className="relative">
-                <User className="absolute left-3 top-3 text-gray-400" size={20} />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                 <input
                   type="text"
                   className="input pl-10"
@@ -81,9 +78,24 @@ const Register = () => {
             </div>
 
             <div>
+              <label className="label">Email</label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="email"
+                  className="input pl-10"
+                  placeholder="Seu e-mail"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
               <label className="label">Setor</label>
               <div className="relative">
-                <Briefcase className="absolute left-3 top-3 text-gray-400" size={20} />
+                <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                 <input
                   type="text"
                   className="input pl-10"
@@ -95,33 +107,34 @@ const Register = () => {
               </div>
             </div>
 
-            <div>
-              <label className="label">Senha</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 text-gray-400" size={20} />
-                <input
-                  type="password"
-                  className="input pl-10"
-                  placeholder="Mínimo 6 caracteres"
-                  value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
-                  required
-                />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="label">Senha</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                  <input
+                    type="password"
+                    className="input pl-10"
+                    placeholder="Mínimo 6 caracteres"
+                    value={senha}
+                    onChange={(e) => setSenha(e.target.value)}
+                    required
+                  />
+                </div>
               </div>
-            </div>
-
-            <div>
-              <label className="label">Confirmar Senha</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 text-gray-400" size={20} />
-                <input
-                  type="password"
-                  className="input pl-10"
-                  placeholder="Digite a senha novamente"
-                  value={confirmarSenha}
-                  onChange={(e) => setConfirmarSenha(e.target.value)}
-                  required
-                />
+              <div>
+                <label className="label">Confirmar Senha</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                  <input
+                    type="password"
+                    className="input pl-10"
+                    placeholder="Repita a senha"
+                    value={confirmarSenha}
+                    onChange={(e) => setConfirmarSenha(e.target.value)}
+                    required
+                  />
+                </div>
               </div>
             </div>
 
@@ -135,7 +148,7 @@ const Register = () => {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-gray-600">
+            <p className="text-text-secondary">
               Já tem uma conta?{' '}
               <Link to="/login" className="text-primary font-semibold hover:underline">
                 Faça login

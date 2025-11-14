@@ -110,6 +110,7 @@ const Admin = () => {
       alert('Erro ao fechar evento');
     }
   };
+  
   const handleReabrirEvento = async (eventoId) => {
     if (!confirm('Deseja reabrir este evento? As pessoas poderão fazer pedidos novamente.')) return;
     
@@ -151,32 +152,32 @@ const Admin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-light">
+    <div className="min-h-screen bg-background">
       <Header />
       
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold">Painel Admin</h1>
+          <h1 className="text-4xl font-bold text-text-primary">Painel Admin</h1>
         </div>
 
         {/* Abas */}
-        <div className="flex space-x-4 mb-6 border-b">
+        <div className="flex space-x-4 mb-6 border-b border-border-color">
           <button
             onClick={() => setActiveTab('sabores')}
-            className={`pb-4 px-4 font-semibold ${
+            className={`pb-4 px-4 font-semibold transition-colors ${
               activeTab === 'sabores'
                 ? 'border-b-2 border-primary text-primary'
-                : 'text-gray-600'
+                : 'text-text-secondary hover:text-text-primary'
             }`}
           >
             Sabores de Pizza
           </button>
           <button
             onClick={() => setActiveTab('eventos')}
-            className={`pb-4 px-4 font-semibold ${
+            className={`pb-4 px-4 font-semibold transition-colors ${
               activeTab === 'eventos'
                 ? 'border-b-2 border-primary text-primary'
-                : 'text-gray-600'
+                : 'text-text-secondary hover:text-text-primary'
             }`}
           >
             Eventos
@@ -197,9 +198,9 @@ const Admin = () => {
             </div>
 
             {mostrarFormSabor && (
-              <div className="card mb-6">
+              <div className="card mb-6 animate-fadeIn">
                 <h2 className="text-2xl font-bold mb-4">Novo Sabor</h2>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <input
                     type="text"
                     className="input"
@@ -231,10 +232,10 @@ const Admin = () => {
               <h2 className="text-2xl font-bold mb-4">Sabores Cadastrados</h2>
               <div className="space-y-4">
                 {sabores.map(sabor => (
-                  <div key={sabor.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div key={sabor.id} className="flex items-center justify-between p-4 border border-border-color rounded-lg">
                     {editando === sabor.id ? (
                       <>
-                        <div className="flex-1 grid grid-cols-2 gap-4">
+                        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <input
                             type="text"
                             className="input"
@@ -262,7 +263,7 @@ const Admin = () => {
                           </button>
                           <button
                             onClick={() => setEditando(null)}
-                            className="p-2 bg-gray-500 text-white rounded-lg"
+                            className="p-2 bg-text-secondary text-white rounded-lg"
                           >
                             <X size={20} />
                           </button>
@@ -271,20 +272,20 @@ const Admin = () => {
                     ) : (
                       <>
                         <div className="flex-1">
-                          <h3 className="text-xl font-bold">{sabor.nome}</h3>
-                          <p className="text-gray-600">R$ {sabor.preco_pedaco.toFixed(2)}</p>
+                          <h3 className="text-xl font-bold text-text-primary">{sabor.nome}</h3>
+                          <p className="text-text-secondary">R$ {sabor.preco_pedaco.toFixed(2)}</p>
                           {!sabor.ativo && <span className="text-red-500 text-sm">Inativo</span>}
                         </div>
                         <div className="flex space-x-2">
                           <button
                             onClick={() => setEditando(sabor.id)}
-                            className="p-2 bg-accent text-white rounded-lg"
+                            className="p-2 bg-text-secondary text-white rounded-lg"
                           >
                             <Edit size={20} />
                           </button>
                           <button
                             onClick={() => handleDeletarSabor(sabor.id)}
-                            className="p-2 bg-red-500 text-white rounded-lg"
+                            className="p-2 bg-primary text-white rounded-lg"
                           >
                             <Trash2 size={20} />
                           </button>
@@ -312,7 +313,7 @@ const Admin = () => {
             </div>
 
             {mostrarFormEvento && (
-              <div className="card mb-6">
+              <div className="card mb-6 animate-fadeIn">
                 <h2 className="text-2xl font-bold mb-4">Criar Novo Evento</h2>
                 <div className="space-y-4">
                   <div>
@@ -325,7 +326,7 @@ const Admin = () => {
                       onChange={(e) => setNovoEvento({...novoEvento, nome: e.target.value})}
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="label">Data do Evento</label>
                       <input
@@ -360,15 +361,15 @@ const Admin = () => {
             <div className="grid grid-cols-1 gap-6">
               {eventos.map(evento => (
                 <div key={evento.id} className="card">
-                  <div className="flex justify-between items-start mb-4">
+                  <div className="flex flex-col sm:flex-row justify-between items-start mb-4">
                     <div>
-                      <h3 className="text-2xl font-bold">
+                      <h3 className="text-2xl font-bold text-text-primary">
                         {evento.nome || `Pizzada de ${new Date(evento.data_evento).toLocaleDateString('pt-BR')}`}
                       </h3>
-                      <p className="text-gray-600">
+                      <p className="text-text-secondary">
                         Data: {new Date(evento.data_evento).toLocaleDateString('pt-BR')}
                       </p>
-                      <p className="text-gray-600">
+                      <p className="text-text-secondary">
                         Pedidos até: {new Date(evento.data_limite).toLocaleString('pt-BR')}
                       </p>
                       <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold mt-2 ${
@@ -379,7 +380,7 @@ const Admin = () => {
                         {evento.status}
                       </span>
                     </div>
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-2 mt-4 sm:mt-0">
                       <button
                         onClick={() => loadPedidosEvento(evento.id)}
                         className="btn-secondary"
@@ -396,14 +397,14 @@ const Admin = () => {
                       ) : evento.status === 'FECHADO' && (
                         <button
                           onClick={() => handleReabrirEvento(evento.id)}
-                          className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+                          className="bg-secondary text-text-primary px-4 py-2 rounded-lg hover:bg-secondary-hover"
                         >
                           Reabrir Evento
                         </button>
                       )}
                       <button
                         onClick={() => handleDeletarEvento(evento.id)}
-                        className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                        className="p-2 bg-primary text-white rounded-lg hover:bg-primary-hover"
                         title="Deletar evento"
                       >
                         <Trash2 size={20} />
@@ -412,29 +413,29 @@ const Admin = () => {
                   </div>
 
                   {eventoSelecionado === evento.id && pedidos.length > 0 && (
-                    <div className="mt-6 border-t pt-4">
+                    <div className="mt-6 border-t border-border-color pt-4">
                       <h4 className="text-xl font-bold mb-4">Pedidos ({pedidos.length})</h4>
                       <div className="space-y-4">
                         {pedidos.map(pedido => (
-                          <div key={pedido.id} className="border rounded-lg p-4">
+                          <div key={pedido.id} className="border border-border-color rounded-lg p-4">
                             <div className="flex justify-between items-start">
                               <div className="flex-1">
                                 <div className="flex items-center space-x-4 mb-2">
                                   <Users size={20} className="text-primary" />
                                   <div>
-                                    <p className="font-bold">{pedido.usuario_nome}</p>
-                                    <p className="text-sm text-gray-600">{pedido.usuario_setor}</p>
+                                    <p className="font-bold text-text-primary">{pedido.usuario_nome}</p>
+                                    <p className="text-sm text-text-secondary">{pedido.usuario_setor}</p>
                                   </div>
                                 </div>
                                 <div className="ml-9">
                                   {pedido.itens.map((item, idx) => (
-                                    <p key={idx} className="text-sm">
-                                      {item.quantidade}x {item.sabor_nome} - R$ {item.subtotal.toFixed(2)}
+                                    <p key={idx} className="text-sm text-text-secondary">
+                                      {item.quantidade}x {item.sabor_nome} - <span className="text-text-primary">R$ {item.subtotal.toFixed(2)}</span>
                                     </p>
                                   ))}
-                                  <div className="mt-2 pt-2 border-t">
-                                    <p className="text-sm">Frete: R$ {pedido.valor_frete.toFixed(2)}</p>
-                                    <p className="font-bold">
+                                  <div className="mt-2 pt-2 border-t border-border-color">
+                                    <p className="text-sm text-text-secondary">Frete: R$ {pedido.valor_frete.toFixed(2)}</p>
+                                    <p className="font-bold text-text-primary">
                                       Total: R$ {(pedido.valor_total + pedido.valor_frete).toFixed(2)}
                                     </p>
                                   </div>
@@ -442,7 +443,7 @@ const Admin = () => {
                               </div>
                               <button
                                 onClick={() => handleDeletarPedido(pedido.id)}
-                                className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                                className="p-2 bg-primary text-white rounded-lg hover:bg-primary-hover"
                                 title="Excluir pedido"
                               >
                                 <Trash2 size={20} />
@@ -455,7 +456,7 @@ const Admin = () => {
                   )}
 
                   {eventoSelecionado === evento.id && pedidos.length === 0 && (
-                    <div className="mt-6 border-t pt-4 text-center text-gray-500">
+                    <div className="mt-6 border-t border-border-color pt-4 text-center text-text-secondary">
                       <AlertCircle size={48} className="mx-auto mb-2 text-gray-400" />
                       <p>Nenhum pedido ainda neste evento</p>
                     </div>
