@@ -115,8 +115,14 @@ const AdminPizzaDashboard = ({ pedidos, sabores, eventoId }) => {
 
         // Helper function to process a list of flavors (like the backend)
         const processFlavorGroup = (flavors) => {
-            // Sort by total slices DESC (Popularity)
-            flavors.sort((a, b) => b.slices.length - a.slices.length);
+            // Sort by total slices DESC (Popularity), then by ID for deterministic ordering
+            // IMPORTANT: This ensures frontend and backend generate the same pizza IDs
+            flavors.sort((a, b) => {
+                if (b.slices.length !== a.slices.length) {
+                    return b.slices.length - a.slices.length;
+                }
+                return a.id - b.id; // Secondary sort by ID for determinism
+            });
 
             const completePizzas = [];
             const halfPizzas = [];
