@@ -49,6 +49,17 @@ const Pagamentos = () => {
         try {
             setLoading(true);
             const response = await pagamentosService.getRelatorio(eventoId);
+
+            // DEBUG: Mostrar os dados recebidos do backend
+            console.log('[DEBUG Pagamentos] Relatório recebido do evento:', eventoId);
+            console.log('[DEBUG Pagamentos] Dados completos:', response.data);
+            if (response.data.pedido?.itens) {
+                console.log('[DEBUG Pagamentos] Itens do pedido com pizza_numeros:');
+                response.data.pedido.itens.forEach((item, idx) => {
+                    console.log(`  Item ${idx + 1}: ${item.sabor_nome} - pizza_numeros:`, item.pizza_numeros);
+                });
+            }
+
             setRelatorio(response.data);
             setEventoSelecionado(response.data.evento);
             setError('');
