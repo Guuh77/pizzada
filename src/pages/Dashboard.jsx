@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { eventosService, dashboardService, pedidosService, saboresService } from '../services/api';
+import { eventosService, dashboardService, pedidosService, saboresService, votacoesService } from '../services/api';
 import Header from '../components/Header';
 import Loading from '../components/Loading';
 import PizzaProgress, { MeiaPizzaProgress } from '../components/PizzaProgress';
 import {
   Pizza, Users, DollarSign, Calendar, TrendingUp, AlertCircle,
-  Edit, Trash2, Zap, BarChart2, PieChart
+  Edit, Trash2, Zap, BarChart2, PieChart, Vote, Check
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -25,6 +25,12 @@ const Dashboard = () => {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('resumo');
   const [flavorTypes, setFlavorTypes] = useState({});
+
+  // Estados para Votações
+  const [votacoesAtivas, setVotacoesAtivas] = useState([]);
+  const [votacoesResultados, setVotacoesResultados] = useState([]);
+  const [votando, setVotando] = useState(null);
+
   useEffect(() => {
     selectedEventIdRef.current = eventoSelecionado?.id;
   }, [eventoSelecionado]);
@@ -37,11 +43,17 @@ const Dashboard = () => {
 
   const loadData = async () => {
     try {
-      const [eventosRes, pedidosRes, saboresRes] = await Promise.all([
+      const [eventosRes, pedidosRes, saboresRes, votacoesAtivasRes, votacoesResultadosRes] = await Promise.all([
         eventosService.getAtivos(),
         pedidosService.getMeusPedidos().catch(() => ({ data: [] })),
-        saboresService.getAll(false).catch(() => ({ data: [] }))
+        saboresService.getAll(false).catch(() => ({ data: [] })),
+        votacoesService.listarAtivas().catch(() => ({ data: [] })),
+        votacoesService.listarResultadosVisiveis().catch(() => ({ data: [] }))
       ]);
+
+      setVotacoesAtivas(votacoesAtivasRes.data);
+      setVotacoesResultados(votacoesResultadosRes.data);
+
       const typeMap = {};
       saboresRes.data.forEach(s => {
         typeMap[s.nome] = s.tipo;
@@ -138,6 +150,25 @@ const Dashboard = () => {
     }
   };
 
+  // Handler para votar
+  const handleVotar = async (votacaoId, escolhaId) => {
+    setVotando(votacaoId);
+    try {
+      await votacoesService.votar(votacaoId, escolhaId);
+      // Recarregar votações
+      const [ativasRes, resultadosRes] = await Promise.all([
+        votacoesService.listarAtivas(),
+        votacoesService.listarResultadosVisiveis()
+      ]);
+      setVotacoesAtivas(ativasRes.data);
+      setVotacoesResultados(resultadosRes.data);
+    } catch (err) {
+      alert(err.response?.data?.detail || 'Erro ao votar');
+    } finally {
+      setVotando(null);
+    }
+  };
+
   const renderLoading = () => <Loading message="Carregando dashboard..." />;
 
   const renderError = () => (
@@ -151,6 +182,9 @@ const Dashboard = () => {
           <h2 className="text-2xl font-bold mb-2 text-white">Ops!</h2>
           <p className="text-text-secondary">{error}</p>
         </div>
+
+        {/* Votações aparecem mesmo sem evento ativo */}
+        {renderVotacoes()}
       </div>
     </div>
   );
@@ -338,6 +372,99 @@ const Dashboard = () => {
       )}
     </div>
   );
+
+  // Componente de Votação
+  const VotingCard = ({ votacao, isResult = false }) => {
+    const jaVotou = votacao.usuario_votou || isResult;
+
+    return (
+      <div className="card animate-fadeIn border-l-4 border-blue-500">
+        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-text-primary">
+          <Vote className="text-blue-400" />
+          {votacao.titulo}
+        </h2>
+
+        {isResult && (
+          <div className="text-sm text-text-secondary mb-4">
+            Votação encerrada • Resultado até {new Date(votacao.data_resultado_ate).toLocaleString('pt-BR')}
+          </div>
+        )}
+
+        {!jaVotou && !isResult ? (
+          // Opções para votar
+          <div className="space-y-3">
+            <p className="text-text-secondary mb-4">
+              Escolha uma opção abaixo para votar. Você só pode votar uma vez!
+            </p>
+            {votacao.escolhas?.map((escolha) => (
+              <button
+                key={escolha.id}
+                onClick={() => handleVotar(votacao.id, escolha.id)}
+                disabled={votando === votacao.id}
+                className="w-full p-4 text-left bg-white/5 hover:bg-blue-500/20 border border-border-color hover:border-blue-500 rounded-xl transition-all flex justify-between items-center group disabled:opacity-50"
+              >
+                <span className="font-medium text-text-primary group-hover:text-blue-400">
+                  {escolha.texto}
+                </span>
+                <Check size={20} className="text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </button>
+            ))}
+            <p className="text-xs text-text-secondary mt-2">
+              Limite: {new Date(votacao.data_limite).toLocaleString('pt-BR')}
+            </p>
+          </div>
+        ) : (
+          // Resultados
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-green-400 text-sm mb-2">
+              <Check size={16} />
+              <span>Você já votou! Total: {votacao.total_votos} votos</span>
+            </div>
+            {votacao.escolhas?.map((escolha) => {
+              const isMyVote = escolha.id === votacao.escolha_usuario;
+              return (
+                <div key={escolha.id} className="relative">
+                  <div className={`flex justify-between items-center mb-1 ${isMyVote ? 'text-blue-400' : 'text-text-primary'}`}>
+                    <span className="font-medium flex items-center gap-2">
+                      {escolha.texto}
+                      {isMyVote && <span className="text-xs bg-blue-500/20 px-2 py-0.5 rounded-full">Seu voto</span>}
+                    </span>
+                    <span className="font-bold">{escolha.porcentagem}%</span>
+                  </div>
+                  <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-700 ${isMyVote ? 'bg-blue-500' : 'bg-primary'}`}
+                      style={{ width: `${escolha.porcentagem}%` }}
+                    />
+                  </div>
+                  <span className="text-xs text-text-secondary">{escolha.votos} votos</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderVotacoes = () => {
+    // Combinar votações ativas (que o usuário ainda não votou ou votou)
+    // com resultados visíveis de votações encerradas
+    const todasVotacoes = [
+      ...votacoesAtivas.map(v => ({ ...v, isResult: false })),
+      ...votacoesResultados.filter(r => !votacoesAtivas.find(a => a.id === r.id)).map(v => ({ ...v, isResult: true }))
+    ];
+
+    if (todasVotacoes.length === 0) return null;
+
+    return (
+      <div className="mt-8 space-y-6">
+        {todasVotacoes.map(votacao => (
+          <VotingCard key={votacao.id} votacao={votacao} isResult={votacao.isResult} />
+        ))}
+      </div>
+    );
+  };
 
   const renderPizzasEmTempoReal = () => {
     if (!agrupamento || (
@@ -537,6 +664,9 @@ const Dashboard = () => {
         ) : (
           renderPizzasEmTempoReal()
         )}
+
+        {/* Votações - aparecem abaixo do conteúdo principal */}
+        {renderVotacoes()}
 
       </div>
     </div>

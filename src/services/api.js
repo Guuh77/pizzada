@@ -109,4 +109,19 @@ export const pizzaConfigService = {
   save: (eventoId, config) => api.put(`/pizza-config/${eventoId}`, config),
 };
 
+// Votações
+export const votacoesService = {
+  // Admin
+  criar: (data) => api.post('/votacoes/', data),
+  listarTodas: () => api.get('/votacoes/'),
+  atualizar: (id, data) => api.put(`/votacoes/${id}`, data),
+  deletar: (id) => api.delete(`/votacoes/${id}`),
+  obterDetalhes: (id) => api.get(`/votacoes/${id}/detalhes`),
+  // User
+  listarAtivas: () => api.get('/votacoes/ativas'),
+  listarResultadosVisiveis: () => api.get('/votacoes/resultados-visiveis'),
+  obter: (id) => api.get(`/votacoes/${id}`),
+  votar: (id, escolhaId) => api.post(`/votacoes/${id}/votar`, { escolha_id: escolhaId }),
+};
+
 export default api;

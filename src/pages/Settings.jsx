@@ -1,10 +1,43 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSettings } from '../contexts/SettingsContext';
+import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
-import { Palette, MousePointer2, Check } from 'lucide-react';
+import { Palette, MousePointer2, Check, User, Save, Loader2 } from 'lucide-react';
+import api from '../services/api';
 
 const Settings = () => {
     const { theme, setTheme, cursorTrailEnabled, toggleCursorTrail } = useSettings();
+    const { user, setUser } = useAuth();
+
+    const [nome, setNome] = useState(user?.nome_completo || '');
+    const [salvando, setSalvando] = useState(false);
+    const [mensagem, setMensagem] = useState('');
+
+    const handleSalvarNome = async () => {
+        if (nome.trim().length < 3) {
+            setMensagem('Nome deve ter pelo menos 3 caracteres');
+            return;
+        }
+
+        setSalvando(true);
+        setMensagem('');
+
+        try {
+            const response = await api.put('/auth/me', { nome_completo: nome.trim() });
+
+            // Atualiza o contexto e localStorage
+            const updatedUser = response.data;
+            setUser(updatedUser);
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+
+            setMensagem('Nome atualizado com sucesso!');
+            setTimeout(() => setMensagem(''), 3000);
+        } catch (err) {
+            setMensagem(err.response?.data?.detail || 'Erro ao atualizar nome');
+        } finally {
+            setSalvando(false);
+        }
+    };
 
     const themes = [
         {
@@ -43,6 +76,59 @@ const Settings = () => {
                         Ajustes
                     </h1>
                     <p className="text-text-secondary">Personalize a aparência e funcionalidades do sistema</p>
+                </div>
+
+                {/* Profile Section */}
+                <div className="card mb-6">
+                    <h2 className="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
+                        <User size={24} />
+                        Perfil
+                    </h2>
+                    <p className="text-text-secondary mb-6">Edite as informações da sua conta</p>
+
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-text-secondary mb-2">
+                                Nome Completo
+                            </label>
+                            <div className="flex gap-3">
+                                <input
+                                    type="text"
+                                    value={nome}
+                                    onChange={(e) => setNome(e.target.value)}
+                                    className="input flex-1"
+                                    placeholder="Seu nome"
+                                />
+                                <button
+                                    onClick={handleSalvarNome}
+                                    disabled={salvando || nome === user?.nome_completo}
+                                    className="btn-primary flex items-center gap-2 disabled:opacity-50"
+                                >
+                                    {salvando ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                                    Salvar
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-text-secondary mb-2">
+                                E-mail
+                            </label>
+                            <input
+                                type="text"
+                                value={user?.email || ''}
+                                disabled
+                                className="input w-full opacity-60 cursor-not-allowed"
+                            />
+                            <p className="text-xs text-text-secondary mt-1">O e-mail não pode ser alterado</p>
+                        </div>
+
+                        {mensagem && (
+                            <div className={`text-sm ${mensagem.includes('sucesso') ? 'text-green-400' : 'text-red-400'}`}>
+                                {mensagem}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Theme Selection */}
@@ -117,3 +203,4 @@ const Settings = () => {
 };
 
 export default Settings;
+

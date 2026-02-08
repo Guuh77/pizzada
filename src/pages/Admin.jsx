@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Header from '../components/Header';
-import { saboresService, eventosService, pedidosService, authService } from '../services/api';
-import { Plus, Edit, Trash2, Save, X, Calendar, Users, AlertCircle, PieChart, Check, CheckCircle, Clock, Bell, RotateCcw, UserPlus, Search } from 'lucide-react';
+import { saboresService, eventosService, pedidosService, authService, votacoesService } from '../services/api';
+import { Plus, Edit, Trash2, Save, X, Calendar, Users, AlertCircle, PieChart, Check, CheckCircle, Clock, Bell, RotateCcw, UserPlus, Search, Vote, Eye, XCircle } from 'lucide-react';
 import AdminPizzaDashboard from '../components/AdminPizzaDashboard';
 
 const Admin = () => {
@@ -36,6 +36,19 @@ const Admin = () => {
   const [itensNovoPedido, setItensNovoPedido] = useState([]);
   const [buscaUsuario, setBuscaUsuario] = useState('');
 
+  // Estados para Votações
+  const [votacoes, setVotacoes] = useState([]);
+  const [mostrarFormVotacao, setMostrarFormVotacao] = useState(false);
+  const [novaVotacao, setNovaVotacao] = useState({
+    titulo: '',
+    data_abertura: '',
+    data_limite: '',
+    data_resultado_ate: '',
+    escolhas: ['', '']  // Começa com 2 escolhas
+  });
+  const [votacaoDetalhe, setVotacaoDetalhe] = useState(null);
+  const [votacaoEditando, setVotacaoEditando] = useState(null);
+
   // Sorted pedidos based on selected filter
   const sortedPedidos = useMemo(() => {
     return [...pedidos].sort((a, b) => {
@@ -59,6 +72,7 @@ const Admin = () => {
     loadEventos();
     loadUsuarios();
     loadPagamentosPendentes();
+    loadVotacoes();
   }, []);
 
   const loadPagamentosPendentes = async () => {
@@ -96,6 +110,15 @@ const Admin = () => {
       setUsuarios(res.data);
     } catch (err) {
       console.error('Erro ao carregar usuários:', err);
+    }
+  };
+
+  const loadVotacoes = async () => {
+    try {
+      const res = await votacoesService.listarTodas();
+      setVotacoes(res.data);
+    } catch (err) {
+      console.error('Erro ao carregar votações:', err);
     }
   };
 
@@ -411,6 +434,78 @@ const Admin = () => {
     setBuscaUsuario('');
   };
 
+  // ============ HANDLERS VOTAÇÕES ============
+
+  const handleCriarVotacao = async () => {
+    const escolhasValidas = novaVotacao.escolhas.filter(e => e.trim() !== '');
+    if (escolhasValidas.length < 2) {
+      alert('A votação precisa ter pelo menos 2 escolhas');
+      return;
+    }
+    if (escolhasValidas.length > 4) {
+      alert('A votação pode ter no máximo 4 escolhas');
+      return;
+    }
+
+    try {
+      await votacoesService.criar({
+        titulo: novaVotacao.titulo,
+        data_abertura: novaVotacao.data_abertura,
+        data_limite: novaVotacao.data_limite,
+        data_resultado_ate: novaVotacao.data_resultado_ate,
+        escolhas: escolhasValidas.map(texto => ({ texto }))
+      });
+      setNovaVotacao({ titulo: '', data_abertura: '', data_limite: '', data_resultado_ate: '', escolhas: ['', ''] });
+      setMostrarFormVotacao(false);
+      loadVotacoes();
+      alert('Votação criada com sucesso!');
+    } catch (err) {
+      alert(err.response?.data?.detail || 'Erro ao criar votação');
+    }
+  };
+
+  const handleFecharVotacao = async (votacaoId) => {
+    if (!confirm('Deseja fechar esta votação? Os usuários não poderão mais votar.')) return;
+    try {
+      await votacoesService.atualizar(votacaoId, { status: 'FECHADO' });
+      loadVotacoes();
+      alert('Votação fechada!');
+    } catch (err) {
+      alert(err.response?.data?.detail || 'Erro ao fechar votação');
+    }
+  };
+
+  const handleDeletarVotacao = async (votacaoId) => {
+    if (!confirm('Deseja realmente DELETAR esta votação?')) return;
+    try {
+      await votacoesService.deletar(votacaoId);
+      loadVotacoes();
+      alert('Votação deletada!');
+    } catch (err) {
+      alert(err.response?.data?.detail || 'Erro ao deletar votação');
+    }
+  };
+
+  const handleVerDetalhesVotacao = async (votacaoId) => {
+    try {
+      const res = await votacoesService.obterDetalhes(votacaoId);
+      setVotacaoDetalhe(res.data);
+    } catch (err) {
+      alert('Erro ao carregar detalhes');
+    }
+  };
+
+  const handleAtualizarVotacao = async (votacaoId, dados) => {
+    try {
+      await votacoesService.atualizar(votacaoId, dados);
+      setVotacaoEditando(null);
+      loadVotacoes();
+      alert('Votação atualizada!');
+    } catch (err) {
+      alert(err.response?.data?.detail || 'Erro ao atualizar');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -454,6 +549,16 @@ const Admin = () => {
               }`}
           >
             Eventos
+          </button>
+          <button
+            onClick={() => setActiveTab('votacoes')}
+            className={`pb-4 px-4 font-semibold transition-colors flex items-center gap-2 ${activeTab === 'votacoes'
+              ? 'border-b-2 border-primary text-primary'
+              : 'text-text-secondary hover:text-text-primary'
+              }`}
+          >
+            <Vote size={20} />
+            Votações
           </button>
           <button
             onClick={() => setActiveTab('tempo_real')}
@@ -1049,6 +1154,278 @@ const Admin = () => {
             </div>
           )
         }
+
+        {/* ABA VOTAÇÕES */}
+        {
+          activeTab === 'votacoes' && (
+            <div className="animate-fadeIn">
+              <div className="flex justify-end mb-6">
+                <button
+                  onClick={() => setMostrarFormVotacao(!mostrarFormVotacao)}
+                  className="btn-primary flex items-center space-x-2"
+                >
+                  <Plus size={20} />
+                  <span>Nova Votação</span>
+                </button>
+              </div>
+
+              {/* Formulário de Nova Votação */}
+              {mostrarFormVotacao && (
+                <div className="card mb-6 animate-fadeIn">
+                  <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                    <Vote className="text-primary" />
+                    Criar Nova Votação
+                  </h2>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="label">Título da Votação</label>
+                      <input
+                        type="text"
+                        className="input"
+                        placeholder="Ex: Qual sabor novo você quer?"
+                        value={novaVotacao.titulo}
+                        onChange={(e) => setNovaVotacao({ ...novaVotacao, titulo: e.target.value })}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="label">Escolhas (mínimo 2, máximo 4)</label>
+                      <div className="space-y-2">
+                        {novaVotacao.escolhas.map((escolha, idx) => (
+                          <div key={idx} className="flex gap-2">
+                            <input
+                              type="text"
+                              className="input flex-1"
+                              placeholder={`Opção ${idx + 1}`}
+                              value={escolha}
+                              onChange={(e) => {
+                                const novas = [...novaVotacao.escolhas];
+                                novas[idx] = e.target.value;
+                                setNovaVotacao({ ...novaVotacao, escolhas: novas });
+                              }}
+                            />
+                            {novaVotacao.escolhas.length > 2 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const novas = novaVotacao.escolhas.filter((_, i) => i !== idx);
+                                  setNovaVotacao({ ...novaVotacao, escolhas: novas });
+                                }}
+                                className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500 hover:text-white transition-colors"
+                                title="Remover opção"
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      {novaVotacao.escolhas.length < 4 && (
+                        <button
+                          type="button"
+                          onClick={() => setNovaVotacao({ ...novaVotacao, escolhas: [...novaVotacao.escolhas, ''] })}
+                          className="mt-3 flex items-center gap-2 text-sm text-primary hover:text-primary-hover transition-colors"
+                        >
+                          <Plus size={16} />
+                          Adicionar opção ({novaVotacao.escolhas.length}/4)
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label className="label">Data de Abertura</label>
+                        <input
+                          type="datetime-local"
+                          className="input"
+                          value={novaVotacao.data_abertura}
+                          onChange={(e) => setNovaVotacao({ ...novaVotacao, data_abertura: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <label className="label">Data Limite (fim dos votos)</label>
+                        <input
+                          type="datetime-local"
+                          className="input"
+                          value={novaVotacao.data_limite}
+                          onChange={(e) => setNovaVotacao({ ...novaVotacao, data_limite: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <label className="label">Resultado Visível Até</label>
+                        <input
+                          type="datetime-local"
+                          className="input"
+                          value={novaVotacao.data_resultado_ate}
+                          onChange={(e) => setNovaVotacao({ ...novaVotacao, data_resultado_ate: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex space-x-4 mt-4">
+                    <button onClick={handleCriarVotacao} className="btn-primary">
+                      Criar Votação
+                    </button>
+                    <button onClick={() => setMostrarFormVotacao(false)} className="btn-outline">
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Lista de Votações */}
+              <div className="card">
+                <h2 className="text-2xl font-bold mb-4">Histórico de Votações</h2>
+                {votacoes.length === 0 ? (
+                  <div className="text-center py-12 text-text-secondary">
+                    <Vote size={48} className="mx-auto mb-4 opacity-50" />
+                    <p>Nenhuma votação criada ainda.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {votacoes.map(votacao => (
+                      <div key={votacao.id} className="p-4 border border-border-color rounded-lg hover:border-primary transition-colors">
+                        <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                          <div className="flex-1">
+                            <h3 className="text-xl font-bold text-text-primary">{votacao.titulo}</h3>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              <span className={`text-xs px-2 py-1 rounded-full ${votacao.status === 'ABERTO'
+                                ? 'bg-green-500/20 text-green-400 border border-green-500/50'
+                                : votacao.status === 'FECHADO'
+                                  ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50'
+                                  : 'bg-gray-500/20 text-gray-400 border border-gray-500/50'
+                                }`}>
+                                {votacao.status}
+                              </span>
+                              <span className="text-xs text-text-secondary">
+                                {votacao.escolhas?.length || 0} opções
+                              </span>
+                            </div>
+                            <div className="text-sm text-text-secondary mt-2 space-y-1">
+                              <p>Abertura: {new Date(votacao.data_abertura).toLocaleString('pt-BR')}</p>
+                              <p>Limite: {new Date(votacao.data_limite).toLocaleString('pt-BR')}</p>
+                              <p>Resultado até: {new Date(votacao.data_resultado_ate).toLocaleString('pt-BR')}</p>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleVerDetalhesVotacao(votacao.id)}
+                              className="p-2 bg-blue-500/20 text-blue-400 border border-blue-500/50 rounded-lg hover:bg-blue-500 hover:text-white transition-colors"
+                              title="Ver detalhes e votos"
+                            >
+                              <Eye size={20} />
+                            </button>
+                            {votacao.status === 'ABERTO' && (
+                              <button
+                                onClick={() => handleFecharVotacao(votacao.id)}
+                                className="p-2 bg-yellow-500/20 text-yellow-400 border border-yellow-500/50 rounded-lg hover:bg-yellow-500 hover:text-white transition-colors"
+                                title="Fechar votação"
+                              >
+                                <XCircle size={20} />
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleDeletarVotacao(votacao.id)}
+                              className="p-2 bg-red-500/20 text-red-400 border border-red-500/50 rounded-lg hover:bg-red-500 hover:text-white transition-colors"
+                              title="Deletar votação"
+                            >
+                              <Trash2 size={20} />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Mini preview das escolhas */}
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {votacao.escolhas?.map((e) => (
+                            <span key={e.id} className="text-xs px-2 py-1 bg-white/5 rounded-full text-text-secondary">
+                              {e.texto}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        }
+
+        {/* Modal de Detalhes da Votação (Admin) */}
+        {votacaoDetalhe && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-card-bg rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-border-color">
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-text-primary">{votacaoDetalhe.titulo}</h2>
+                  <p className="text-text-secondary">
+                    Total de votos: <span className="text-primary font-bold">{votacaoDetalhe.total_votos}</span>
+                  </p>
+                </div>
+                <button
+                  onClick={() => setVotacaoDetalhe(null)}
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                {votacaoDetalhe.escolhas?.map((escolha) => {
+                  const porcentagem = votacaoDetalhe.total_votos > 0
+                    ? ((escolha.votos / votacaoDetalhe.total_votos) * 100).toFixed(1)
+                    : 0;
+
+                  return (
+                    <div key={escolha.id} className="border border-border-color rounded-lg p-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <h3 className="font-bold text-text-primary">{escolha.texto}</h3>
+                        <span className="text-primary font-bold">{escolha.votos} votos ({porcentagem}%)</span>
+                      </div>
+
+                      {/* Barra de progresso */}
+                      <div className="w-full bg-white/10 rounded-full h-2 mb-3">
+                        <div
+                          className="bg-primary h-2 rounded-full transition-all duration-500"
+                          style={{ width: `${porcentagem}%` }}
+                        />
+                      </div>
+
+                      {/* Lista de votantes */}
+                      {escolha.votantes?.length > 0 && (
+                        <div className="mt-3">
+                          <p className="text-sm text-text-secondary mb-2">Quem votou:</p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {escolha.votantes.map((votante) => (
+                              <div
+                                key={votante.usuario_id}
+                                className="text-sm bg-white/5 rounded-lg p-2 flex justify-between"
+                              >
+                                <span className="font-medium text-text-primary">{votante.nome}</span>
+                                <span className="text-text-secondary">{votante.setor}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-border-color">
+                <button
+                  onClick={() => setVotacaoDetalhe(null)}
+                  className="btn-outline w-full"
+                >
+                  Fechar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ABA TEMPO REAL */}
         {
