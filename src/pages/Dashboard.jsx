@@ -375,7 +375,11 @@ const Dashboard = () => {
 
   // Componente de Votação
   const VotingCard = ({ votacao, isResult = false }) => {
+    const [alterandoVoto, setAlterandoVoto] = useState(false);
     const jaVotou = votacao.usuario_votou || isResult;
+    const podeAlterar = jaVotou && !isResult; // Votou mas votação ainda aberta
+
+    const mostrarOpcoes = (!jaVotou && !isResult) || alterandoVoto;
 
     return (
       <div className="card animate-fadeIn border-l-4 border-blue-500">
@@ -390,36 +394,74 @@ const Dashboard = () => {
           </div>
         )}
 
-        {!jaVotou && !isResult ? (
-          // Opções para votar
+        {mostrarOpcoes ? (
+          // Opções para votar (ou alterar voto)
           <div className="space-y-3">
             <p className="text-text-secondary mb-4">
-              Escolha uma opção abaixo para votar. Você só pode votar uma vez!
+              {alterandoVoto
+                ? 'Selecione a nova opção para alterar seu voto:'
+                : 'Escolha uma opção abaixo para votar:'}
             </p>
-            {votacao.escolhas?.map((escolha) => (
-              <button
-                key={escolha.id}
-                onClick={() => handleVotar(votacao.id, escolha.id)}
-                disabled={votando === votacao.id}
-                className="w-full p-4 text-left bg-white/5 hover:bg-blue-500/20 border border-border-color hover:border-blue-500 rounded-xl transition-all flex justify-between items-center group disabled:opacity-50"
-              >
-                <span className="font-medium text-text-primary group-hover:text-blue-400">
-                  {escolha.texto}
-                </span>
-                <Check size={20} className="text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </button>
-            ))}
-            <p className="text-xs text-text-secondary mt-2">
-              Limite: {new Date(votacao.data_limite).toLocaleString('pt-BR')}
-            </p>
+            {votacao.escolhas?.map((escolha) => {
+              const isMyVote = escolha.id === votacao.escolha_usuario;
+              return (
+                <button
+                  key={escolha.id}
+                  onClick={() => {
+                    handleVotar(votacao.id, escolha.id);
+                    setAlterandoVoto(false);
+                  }}
+                  disabled={votando === votacao.id}
+                  className={`w-full p-4 text-left border rounded-xl transition-all flex justify-between items-center group disabled:opacity-50 ${isMyVote && alterandoVoto
+                      ? 'bg-blue-500/20 border-blue-500'
+                      : 'bg-white/5 hover:bg-blue-500/20 border-border-color hover:border-blue-500'
+                    }`}
+                >
+                  <span className="font-medium text-text-primary group-hover:text-blue-400 flex items-center gap-2">
+                    {escolha.texto}
+                    {isMyVote && alterandoVoto && <span className="text-xs bg-blue-500/20 px-2 py-0.5 rounded-full text-blue-400">Voto atual</span>}
+                  </span>
+                  <Check size={20} className="text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </button>
+              );
+            })}
+            <div className="flex items-center justify-between mt-2">
+              <p className="text-xs text-text-secondary">
+                Limite: {new Date(votacao.data_limite).toLocaleString('pt-BR')}
+              </p>
+              {alterandoVoto && (
+                <button
+                  onClick={() => setAlterandoVoto(false)}
+                  className="text-xs text-text-secondary hover:text-text-primary transition-colors"
+                >
+                  Cancelar
+                </button>
+              )}
+            </div>
           </div>
         ) : (
           // Resultados
           <div className="space-y-4">
-            <div className="flex items-center gap-2 text-green-400 text-sm mb-2">
-              <Check size={16} />
-              <span>Você já votou! Total: {votacao.total_votos} votos</span>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2 text-green-400 text-sm">
+                <Check size={16} />
+                <span>Você já votou! Total: {votacao.total_votos} votos</span>
+              </div>
+              {podeAlterar && (
+                <button
+                  onClick={() => setAlterandoVoto(true)}
+                  className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition-colors bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-full border border-blue-500/30"
+                >
+                  <Edit size={12} />
+                  Alterar Voto
+                </button>
+              )}
             </div>
+            {podeAlterar && (
+              <p className="text-xs text-text-secondary -mt-2">
+                Você pode alterar seu voto até {new Date(votacao.data_limite).toLocaleString('pt-BR')}
+              </p>
+            )}
             {votacao.escolhas?.map((escolha) => {
               const isMyVote = escolha.id === votacao.escolha_usuario;
               return (
