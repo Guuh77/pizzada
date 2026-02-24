@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Header from '../components/Header';
 import { saboresService, eventosService, pedidosService, authService, votacoesService, feedbacksService } from '../services/api';
-import { Plus, Edit, Trash2, Save, X, Calendar, Users, AlertCircle, PieChart, Check, CheckCircle, Clock, Bell, RotateCcw, UserPlus, Search, Vote, Eye, XCircle, MessageSquare } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, Calendar, Users, AlertCircle, PieChart, Check, CheckCircle, Clock, Bell, RotateCcw, UserPlus, Search, Vote, Eye, XCircle, MessageSquare, Lock, Unlock } from 'lucide-react';
 import AdminPizzaDashboard from '../components/AdminPizzaDashboard';
 
 const Admin = () => {
@@ -224,6 +224,19 @@ const Admin = () => {
       alert('Evento reaberto com sucesso!');
     } catch (err) {
       alert(err.response?.data?.detail || 'Erro ao reabrir evento');
+    }
+  };
+
+  const handleTogglePagamento = async (eventoId, atualmenteLibarado) => {
+    const acao = atualmenteLibarado ? 'BLOQUEAR' : 'LIBERAR';
+    if (!confirm(`Deseja ${acao} os pagamentos deste evento?`)) return;
+
+    try {
+      await eventosService.togglePagamento(eventoId);
+      loadEventos();
+      alert(`Pagamentos ${atualmenteLibarado ? 'bloqueados' : 'liberados'} com sucesso!`);
+    } catch (err) {
+      alert(err.response?.data?.detail || 'Erro ao alterar pagamentos');
     }
   };
 
@@ -995,6 +1008,16 @@ const Admin = () => {
                           }`}>
                           {evento.status}
                         </span>
+                        {/* Badge de pagamento */}
+                        {evento.pagamento_liberado ? (
+                          <span className="inline-block px-3 py-1 rounded-full text-sm font-semibold mt-2 ml-2 bg-green-100 text-green-800">
+                            💰 Pagamentos Liberados
+                          </span>
+                        ) : (
+                          <span className="inline-block px-3 py-1 rounded-full text-sm font-semibold mt-2 ml-2 bg-gray-100 text-gray-600">
+                            🔒 Pagamentos Bloqueados
+                          </span>
+                        )}
                       </div>
                       <div className="flex space-x-2 mt-4 sm:mt-0">
                         <button
@@ -1024,6 +1047,17 @@ const Admin = () => {
                           title="Deletar evento"
                         >
                           <Trash2 size={20} />
+                        </button>
+                        <button
+                          onClick={() => handleTogglePagamento(evento.id, evento.pagamento_liberado)}
+                          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all hover:scale-105 ${evento.pagamento_liberado
+                              ? 'bg-green-600 text-white hover:bg-red-600'
+                              : 'bg-gray-600 text-white hover:bg-green-600'
+                            }`}
+                          title={evento.pagamento_liberado ? 'Bloquear Pagamentos' : 'Liberar Pagamentos'}
+                        >
+                          {evento.pagamento_liberado ? <Unlock size={18} /> : <Lock size={18} />}
+                          {evento.pagamento_liberado ? 'Bloquear Pag.' : 'Liberar Pag.'}
                         </button>
                       </div>
                     </div>

@@ -69,6 +69,7 @@ export const eventosService = {
   update: (id, data) => api.put(`/eventos/${id}`, data),
   delete: (id) => api.delete(`/eventos/${id}`),
   getResumo: (id) => api.get(`/eventos/${id}/resumo`),
+  togglePagamento: (id) => api.put(`/eventos/${id}/toggle-pagamento`),
 };
 
 // Pedidos

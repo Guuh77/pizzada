@@ -67,7 +67,7 @@ const Pagamentos = () => {
         } catch (err) {
             console.error('Erro ao carregar relatório:', err);
             if (err.response?.status === 403) {
-                setError('Pagamento ainda não disponível. Aguarde o evento ser fechado.');
+                setError('Pagamento ainda não disponível. O admin ainda não liberou os pagamentos deste evento.');
             } else {
                 setError('Erro ao carregar relatório de pagamento');
             }
@@ -180,7 +180,7 @@ const Pagamentos = () => {
                                     }>
                                         {pedido.status === 'PAGO' ? '✅ Pago' :
                                             pedido.status === 'CONFIRMADO' ? '🕒 Aguardando Confirmação' :
-                                                (pagamento_disponivel ? 'Pagamento Disponível' : 'Aguardando Fechamento')}
+                                                (pagamento_disponivel ? 'Pagamento Disponível' : '🔒 Pagamentos Bloqueados')}
                                     </span>
                                 </p>
                             </div>
