@@ -233,7 +233,7 @@ const Dashboard = () => {
       {isAdmin() && (
         <StatCard
           title="Valor Total"
-          value={`R$ ${dashboardData?.valor_total_evento.toFixed(2) || '0.00'}`}
+          value={`R$ ${(dashboardData?.valor_total_evento ?? 0).toFixed(2)}`}
           icon={DollarSign}
           gradient="bg-gradient-to-br from-green-500 to-green-700 shadow-lg"
           delay={400}
@@ -413,8 +413,8 @@ const Dashboard = () => {
                   }}
                   disabled={votando === votacao.id}
                   className={`w-full p-4 text-left border rounded-xl transition-all flex justify-between items-center group disabled:opacity-50 ${isMyVote && alterandoVoto
-                      ? 'bg-blue-500/20 border-blue-500'
-                      : 'bg-white/5 hover:bg-blue-500/20 border-border-color hover:border-blue-500'
+                    ? 'bg-blue-500/20 border-blue-500'
+                    : 'bg-white/5 hover:bg-blue-500/20 border-border-color hover:border-blue-500'
                     }`}
                 >
                   <span className="font-medium text-text-primary group-hover:text-blue-400 flex items-center gap-2">

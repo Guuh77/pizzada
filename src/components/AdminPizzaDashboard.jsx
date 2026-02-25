@@ -332,17 +332,27 @@ const AdminPizzaDashboard = ({ pedidos, sabores, eventoId }) => {
             }
         });
 
-        // Apply number overrides (admin swaps)
+        // Apply number overrides (admin swaps) — with duplicate prevention
         if (Object.keys(numberOverrides).length > 0) {
             const allNumbered = [...stiPizzas, ...sgsPizzas].filter(p => p.number);
             const pizzaById = {};
             allNumbered.forEach(p => { pizzaById[p.id] = p; });
 
-            // Apply overrides atomically
+            // Apply overrides as proper swaps to prevent duplicates
             Object.entries(numberOverrides).forEach(([pizzaId, desiredNumber]) => {
-                if (pizzaById[pizzaId]) {
-                    pizzaById[pizzaId].number = desiredNumber;
+                const pizza = pizzaById[pizzaId];
+                if (!pizza) return; // Pizza no longer exists, skip
+
+                const currentNumber = pizza.number;
+                if (currentNumber === desiredNumber) return; // Already correct
+
+                // Find the pizza that currently holds the desired number
+                const conflicting = allNumbered.find(p => p.number === desiredNumber && p.id !== pizzaId);
+                if (conflicting) {
+                    // Swap: give the conflicting pizza our current number
+                    conflicting.number = currentNumber;
                 }
+                pizza.number = desiredNumber;
             });
         }
 
