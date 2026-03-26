@@ -23,16 +23,7 @@ const Pagamentos = () => {
             const response = await pagamentosService.getMeuHistorico();
             setHistorico(response.data);
 
-            const eventoDisponivel = response.data.find(h => h.pagamento_disponivel && h.pedido.status !== 'PAGO');
-            if (eventoDisponivel) {
-                loadRelatorio(eventoDisponivel.evento.id);
-            } else if (response.data.length > 0) {
-                if (response.data[0].pagamento_disponivel) {
-                    loadRelatorio(response.data[0].evento.id);
-                } else {
-                    setEventoSelecionado(response.data[0].evento);
-                }
-            }
+            // Não auto-abrir fatura — esperar o user clicar em um evento
 
             setError('');
         } catch (err) {
