@@ -1,0 +1,322 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ========================================
+   THEME: PRINCIPAL (ex-Neon)
+   Warm dark with bold red personality
+   ======================================== */
+:root[data-theme="neon"] {
+    --color-background: #0C0C0E;
+    --color-card: #161618;
+    --color-primary: #E63946;
+    --color-primary-hover: #CC2936;
+    --color-secondary: #F4A261;
+    --color-secondary-hover: #E09550;
+    --color-text-primary: #F5F5F5;
+    --color-text-secondary: #8B8B94;
+    --color-border: #2A2A2E;
+    --color-btn-text: #FFFFFF;
+    --shadow-neon-primary: 0 4px 14px -2px rgba(230, 57, 70, 0.35);
+    --shadow-neon-secondary: 0 4px 14px -2px rgba(244, 162, 97, 0.3);
+    --shadow-card: 0 2px 8px -2px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255,255,255,0.04);
+    --shadow-card-hover: 0 8px 24px -4px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.06);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-full: 9999px;
+}
+
+/* Temas removidos temporariamente: Classic, Dark */
+
+/* ========================================
+   THEME: NEVE (Christmas)
+   Festive with snowfall animation
+   ======================================== */
+:root[data-theme="christmas"] {
+    --color-background: #0A0F1A;
+    --color-card: #111827;
+    --color-primary: #DC2626;
+    --color-primary-hover: #B91C1C;
+    --color-secondary: #15803D;
+    --color-secondary-hover: #166534;
+    --color-text-primary: #F8FAFC;
+    --color-text-secondary: #94A3B8;
+    --color-border: #1E293B;
+    --color-btn-text: #FFFFFF;
+    --shadow-neon-primary: 0 4px 14px -2px rgba(220, 38, 38, 0.35);
+    --shadow-neon-secondary: 0 4px 14px -2px rgba(21, 128, 61, 0.3);
+    --shadow-card: 0 2px 8px -2px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.04);
+    --shadow-card-hover: 0 8px 24px -4px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255,255,255,0.06);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-full: 9999px;
+}
+
+/* ========================================
+   THEME: PREMIUM (Gold / Exclusive)
+   Deep black with golden accents
+   ======================================== */
+:root[data-theme="premium"] {
+    --color-background: #050505;
+    --color-card: rgba(18, 18, 20, 0.65);
+    --color-primary: #D4A017;
+    --color-primary-hover: #F2C037;
+    --color-secondary: #F5C542;
+    --color-secondary-hover: #FFD700;
+    --color-text-primary: #FAFAF9;
+    --color-text-secondary: #D4D4D8;
+    --color-border: rgba(212, 160, 23, 0.15);
+    --color-btn-text: #050505;
+    --shadow-neon-primary: 0 4px 20px -2px rgba(212, 160, 23, 0.6);
+    --shadow-neon-secondary: 0 4px 20px -2px rgba(245, 197, 66, 0.4);
+    --shadow-card: inset 0 0 0 1px rgba(212, 160, 23, 0.08), 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+    --shadow-card-hover: inset 0 0 0 1px rgba(212, 160, 23, 0.35), 0 8px 32px 0 rgba(212, 160, 23, 0.2);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-full: 9999px;
+}
+
+/* Premium Background Override */
+:root[data-theme="premium"] body {
+    background: radial-gradient(circle at top right, rgba(40, 30, 0, 0.8), #050505 40%);
+    background-attachment: fixed;
+}
+
+/* Premium Card Glassmorphism & Hover */
+:root[data-theme="premium"] .card {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: none !important;
+    background: linear-gradient(145deg, rgba(26,26,26,0.6) 0%, rgba(10,10,10,0.8) 100%);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+:root[data-theme="premium"] .card:hover {
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-2px);
+}
+
+/* Premium Button Overrides */
+:root[data-theme="premium"] .btn-primary,
+:root[data-theme="premium"] button.bg-primary {
+    background: linear-gradient(135deg, #FFD700 0%, #D4A017 50%, #B8860B 100%);
+    background-size: 200% auto;
+    color: #0A0A0A !important;
+    font-weight: 800;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(212, 160, 23, 0.4);
+    transition: all 0.3s ease;
+}
+
+:root[data-theme="premium"] .btn-primary:hover,
+:root[data-theme="premium"] button.bg-primary:hover {
+    background-position: right center;
+    box-shadow: 0 6px 20px rgba(212, 160, 23, 0.6);
+    transform: translateY(-1px);
+}
+
+
+/* ========================================
+   PREMIUM NAME STYLES
+   ======================================== */
+.premium-name {
+    background: linear-gradient(135deg, #FFD700, #FFA500, #FFD700, #FFEC8B);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: premium-shimmer 4s ease infinite;
+    font-weight: 700;
+}
+
+.premium-crown {
+    display: inline-block;
+    position: relative;
+    top: -0.15em;
+    left: -0.1em;
+    transform: rotate(-20deg);
+    font-size: 0.75em;
+    filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.5));
+    animation: premium-crown-float 3s ease-in-out infinite;
+}
+
+@keyframes premium-shimmer {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes premium-crown-float {
+    0%, 100% { transform: rotate(-20deg) translateY(0); }
+    50% { transform: rotate(-15deg) translateY(-2px); }
+}
+
+/* ========================================
+   BASE STYLES
+   ======================================== */
+body {
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    font-family: 'Outfit', sans-serif;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ========================================
+   COMPONENT CLASSES
+   ======================================== */
+
+/* Primary Button — Bold but refined */
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-primary);
+    color: var(--color-btn-text);
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-neon-primary);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
+}
+.btn-primary:hover:not(:disabled) {
+    background-color: var(--color-primary-hover);
+    box-shadow: 0 6px 20px -2px rgba(230, 57, 70, 0.45);
+    transform: translateY(-1px);
+}
+.btn-primary:focus {
+    outline: none;
+    box-shadow: var(--shadow-neon-primary), 0 0 0 3px rgba(230, 57, 70, 0.3);
+}
+.btn-primary:active:not(:disabled) {
+    transform: scale(0.97);
+}
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Secondary Button */
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-secondary);
+    color: var(--color-btn-text);
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-neon-secondary);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
+}
+.btn-secondary:hover:not(:disabled) {
+    background-color: var(--color-secondary-hover);
+    transform: translateY(-1px);
+}
+.btn-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Outline Button */
+.btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-primary);
+    color: var(--color-primary);
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+.btn-outline:hover:not(:disabled) {
+    background-color: var(--color-primary);
+    color: white;
+}
+.btn-outline:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Card — Premium surface */
+.card {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.card:hover {
+    box-shadow: var(--shadow-card-hover);
+}
+
+/* Input — Clean */
+.input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+.input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.15);
+}
+.input::placeholder {
+    color: var(--color-text-secondary);
+    opacity: 0.6;
+}
+
+.label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+/* ========================================
+   SCROLLBAR — Subtle
+   ======================================== */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: var(--color-background);
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--color-border);
+    border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-primary);
+}
+
+/* ========================================
+   SELECTION
+   ======================================== */
+::selection {
+    background-color: var(--color-primary);
+    color: white;
+}
