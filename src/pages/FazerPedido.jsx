@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { saboresService, eventosService, pedidosService } from '../services/api';
 import Header from '../components/Header';
 import Loading from '../components/Loading';
+import OrderSuccessOverlay from '../components/OrderSuccessOverlay';
 import { Plus, Minus, ShoppingCart, AlertCircle, Edit, Star, ArrowRight } from 'lucide-react';
 import { formatDateTimeBR, formatLegacyEventDateBR } from '../utils/dates';
 
@@ -19,9 +20,17 @@ const FazerPedido = () => {
   const [modoEdicao, setModoEdicao] = useState(false);
   const [pedidoEditando, setPedidoEditando] = useState(null);
   const [favoritos, setFavoritos] = useState([]);
+  const [successMode, setSuccessMode] = useState(null);
+  const successTimeoutRef = useRef(null);
 
   useEffect(() => {
     loadData();
+
+    return () => {
+      if (successTimeoutRef.current) {
+        clearTimeout(successTimeoutRef.current);
+      }
+    };
   }, []);
 
   const loadData = async () => {
@@ -123,13 +132,15 @@ const FazerPedido = () => {
 
       if (modoEdicao) {
         await pedidosService.editar(pedidoEditando.id, pedidoData);
-        alert('Pedido atualizado com sucesso!');
+        setSuccessMode('updated');
       } else {
         await pedidosService.create(pedidoData);
-        alert('Pedido realizado com sucesso!');
+        setSuccessMode('created');
       }
 
-      navigate('/dashboard');
+      successTimeoutRef.current = setTimeout(() => {
+        navigate('/dashboard');
+      }, 1700);
     } catch (err) {
       setError(err.response?.data?.detail || `Erro ao ${modoEdicao ? 'atualizar' : 'fazer'} pedido`);
     } finally {
@@ -339,7 +350,7 @@ const FazerPedido = () => {
                 className={`w-full py-3.5 rounded-lg font-semibold text-sm transition-all duration-300 flex items-center justify-center gap-2 ${totalCarrinho > 0
                   ? 'btn-primary'
                   : 'bg-card border border-border-color text-text-secondary cursor-not-allowed opacity-60'}`}
-                disabled={submitting || totalCarrinho === 0}
+                disabled={submitting || successMode || totalCarrinho === 0}
               >
                 {submitting ? 'Processando...' : (modoEdicao ? 'Atualizar Pedido' : 'Registrar Pedido')}
                 {!submitting && totalCarrinho > 0 && <ArrowRight size={16} />}
@@ -357,6 +368,8 @@ const FazerPedido = () => {
           </div>
         </div>
       </div>
+
+      {successMode && <OrderSuccessOverlay mode={successMode} />}
     </div>
   );
 };
