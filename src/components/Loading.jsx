@@ -17,7 +17,7 @@ const Loading = ({ message }) => {
 
   useEffect(() => {
     setIsPremium(document.documentElement.getAttribute('data-theme') === 'premium');
-    
+
     const fraseInterval = setInterval(() => {
       setFraseIndex(prev => (prev + 1) % frases.length);
     }, 2000);
@@ -30,7 +30,7 @@ const Loading = ({ message }) => {
         <div className="absolute inset-0 opacity-40">
           <PremiumParticles />
         </div>
-        
+
         {/* Giant background text */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.02]">
           <span className="text-[20vw] font-black tracking-tighter text-[#D4A017] whitespace-nowrap">
@@ -88,15 +88,17 @@ const Loading = ({ message }) => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center gap-8 px-6 max-w-md w-full">
-        {/* Pizza emoji spinner */}
-        <div className="relative">
-          <div className="w-24 h-24 rounded-full border-4 border-border-color flex items-center justify-center">
-            <span className="text-5xl animate-spin" style={{ animationDuration: '3s' }}>🍕</span>
-          </div>
-          <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-primary animate-spin" style={{ animationDuration: '1.5s' }}></div>
+      <div className="relative z-10 flex flex-col items-center gap-6 px-6 max-w-md w-full">
+        {/* Pixel art loading sprite */}
+        <div className="relative flex items-center justify-center">
+          <div className="absolute bottom-1 h-3 w-28 rounded-full bg-black/35 blur-sm" />
+          <div
+            className="roger-pizza-juggle relative z-10"
+            role="img"
+            aria-label="Roger fazendo malabarismo com pizzas"
+          />
         </div>
-
+        
         {/* Message */}
         <div className="text-center space-y-2">
           <h2 className="text-2xl font-bold text-text-primary">
@@ -118,8 +120,27 @@ const Loading = ({ message }) => {
             50% { transform: translateX(250%); }
             100% { transform: translateX(-100%); }
           }
+          @keyframes rogerPizzaJuggle {
+            0%, 13% { background-position: 0% 0; }
+            16%, 30% { background-position: 20% 0; }
+            33%, 47% { background-position: 40% 0; }
+            50%, 64% { background-position: 60% 0; }
+            67%, 81% { background-position: 80% 0; }
+            84%, 100% { background-position: 100% 0; }
+          }
           .animate-indeterminate {
             animation: indeterminate 1.8s ease-in-out infinite;
+          }
+          .roger-pizza-juggle {
+            width: clamp(118px, 24vw, 154px);
+            aspect-ratio: 362 / 528;
+            background-image: url('/roger-pizza-juggle-sheet.png?v=keyed-2');
+            background-repeat: no-repeat;
+            background-size: 600% 100%;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            animation: rogerPizzaJuggle 0.9s steps(1, end) infinite;
+            filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.45));
           }
         `}</style>
       </div>
